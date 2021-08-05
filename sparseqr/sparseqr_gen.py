@@ -5,6 +5,7 @@ Description: Wrapper for SuiteSparse qr() and solve() functions. Matlab and Juli
 '''
 
 from __future__ import print_function, division, absolute_import
+from os.path import join, expanduser
 
 from cffi import FFI
 
@@ -15,7 +16,9 @@ ffibuilder.set_source( "sparseqr._sparseqr",
 """,
     ## You may need to modify the following line,
     ## which is needed on Ubuntu and harmless on Mac OS.
-    include_dirs = [ '/usr/include/suitesparse' ],
+    homedir = expanduser("~")
+    envdir = join(homedir, os.environ['CONDA_DEFAULT_ENV'], 'Library/include/suitesparse')
+    include_dirs = [ '/usr/include/suitesparse', envdir ]
     libraries=['spqr'])
 
 ffibuilder.cdef("""
@@ -267,8 +270,8 @@ void *cholmod_l_free	/* always returns NULL */
     cholmod_common *Common
 ) ;
 
-/* cs_spsolve 
-int cs_spsolve 
+/* cs_spsolve
+int cs_spsolve
 {
 */
 
