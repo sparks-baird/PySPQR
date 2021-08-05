@@ -5,9 +5,23 @@ Description: Wrapper for SuiteSparse qr() and solve() functions. Matlab and Juli
 '''
 
 from __future__ import print_function, division, absolute_import
+import os
 from os.path import join, expanduser
+import platform
 
 from cffi import FFI
+
+# for compatibility with conda envs
+homedir = expanduser("~")
+envdir1 = join(homedir, 'anaconda3', 'envs', os.environ['CONDA_DEFAULT_ENV'], 'Library', 'include', 'suitesparse')
+envdir2 = join(homedir, 'miniconda3', 'envs', os.environ['CONDA_DEFAULT_ENV'], 'Library', 'include', 'suitesparse')
+
+if platform.system() == 'Windows':
+    libraries = ['amd','btf','camd','ccolamd','cholmod','colamd','cxsparse'
+'klu','lapack','ldl','lumfpack','metis','suitesparseconfig','spqr','libblas']
+    # https://github.com/yig/PySPQR/issues/6
+else:
+    libraries = ['spqr']
 
 ffibuilder = FFI()
 
@@ -16,10 +30,8 @@ ffibuilder.set_source( "sparseqr._sparseqr",
 """,
     ## You may need to modify the following line,
     ## which is needed on Ubuntu and harmless on Mac OS.
-    homedir = expanduser("~")
-    envdir = join(homedir, os.environ['CONDA_DEFAULT_ENV'], 'Library/include/suitesparse')
-    include_dirs = [ '/usr/include/suitesparse', envdir ]
-    libraries=['spqr'])
+    include_dirs = [ '/usr/include/suitesparse', join('C:', 'Program Files', 'Python', 'suitesparse') , envdir1, envdir2 ],
+    libraries=libraries) #libraries=['spqr']
 
 ffibuilder.cdef("""
 // The int... is a magic thing which tells the compiler to figure out what the right
